@@ -1,0 +1,12 @@
+# Render (free tier) blueprint: push this folder to GitHub, then New > Blueprint on render.com
+services:
+  - type: web
+    name: foodbridge
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: TOKEN_SECRET
+        generateValue: true
