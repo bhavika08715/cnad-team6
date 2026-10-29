@@ -2,6 +2,35 @@
 
 CNAD (24CND3101) · Team 6 · Y. Bhavika, N. Keerthi Sri, Y. Adarsh Rishi · Guide: P. Srilatha / V. Vinisha
 
+## Project details
+
+**Problem.** Restaurants, hotels, supermarkets, cafeterias and events produce surplus food every day, but it is usually discovered too late and is hard to match with nearby people who need it, so usable food is wasted.
+
+**Solution.** FoodBridge is a cloud-native web platform that (1) predicts how much surplus a donor will have and when, (2) matches posted food with nearby verified NGOs, shelters, community kitchens and food banks, (3) notifies them instantly, and (4) tracks every pickup until delivery.
+
+**Users.** Donor (posts surplus), Receiver (accepts and collects food), Admin (verifies receivers, sees platform analytics).
+
+**Objectives covered.** Register and monitor surplus; predict quantity and timing; hyperlocal matching using proximity, food type, quantity, urgency, receiver capacity and pickup availability; notifications and end-to-end tracking; dashboards with impact metrics.
+
+### Technology stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | HTML, CSS, JavaScript, Leaflet + OpenStreetMap |
+| Backend | Node.js, Express, REST APIs, service-oriented modules behind an API gateway |
+| Prediction (ML) | Ensemble time-series forecasting (day-of-week mean + moving average) with back-testing |
+| Datastore | Embedded JSON store (swappable for PostgreSQL) |
+| Containerisation | Docker |
+| Orchestration | Kubernetes on Minikube, packaged and deployed with Helm |
+| Cloud hosting (optional) | Render |
+| Testing | Automated end-to-end test (`npm test`), Postman-compatible REST API |
+
+### Cloud-native deployment (Docker + Helm + Minikube)
+
+- **Docker:** `Dockerfile` packages the app into one image (Node 20 Alpine).
+- **Helm:** `helm/foodbridge` is the chart (Deployment, Service, Secret, PersistentVolumeClaim). Settings such as image, replicas, port, resources and secret live in `values.yaml`.
+- **Minikube:** runs a local Kubernetes cluster. The Deployment has readiness/liveness probes on `/api/health`, resource requests/limits, a Secret for the token key and a persistent volume for data.
+
 ## Run it (3 steps)
 
 1. Install **Node.js LTS** (v18 or newer) from https://nodejs.org (skip if `node -v` already works).
@@ -65,6 +94,27 @@ Score (0–100): proximity, capacity fit, pickup-window availability, time slack
 ### Security (feedback from Review 1)
 scrypt password hashing, HMAC-signed expiring tokens, role-based access control, input validation, per-IP rate limiting, security headers, HTML-escaped output.
 
+## Deploy on Kubernetes (Docker + Helm + Minikube)
+
+Install once: Docker Desktop, [minikube](https://minikube.sigs.k8s.io/docs/start/), kubectl, [helm](https://helm.sh/docs/intro/install/). Start Docker Desktop, then:
+
+- **Windows:** double-click `k8s\deploy-minikube.bat`
+- **Mac/Linux:** `./k8s/deploy-minikube.sh`
+
+Or step by step from the project folder:
+
+```
+minikube start --driver=docker
+minikube image build -t foodbridge:1.0 .
+helm upgrade --install foodbridge helm/foodbridge
+kubectl get pods
+minikube service foodbridge-foodbridge
+```
+
+The last command opens the app in your browser (keep that terminal open). Useful extras: `kubectl logs deploy/foodbridge-foodbridge`, `helm list`, `helm uninstall foodbridge`, `minikube dashboard`.
+
+Note: the datastore is a single file, so the chart runs 1 replica. Moving to PostgreSQL would allow scaling out (`replicaCount` in `values.yaml`).
+
 ## Deploy to the cloud (Render free tier)
 
 1. Push this folder to a GitHub repo.
@@ -85,4 +135,5 @@ Docker: `docker build -t foodbridge . && docker run -p 3000:3000 foodbridge`
 - The ML model is implemented in pure JavaScript (no external ML library) to keep setup to a single command; the slides mention Java ML, so say "time-series ensemble forecasting" and show the back-test numbers.
 - Historical data is synthetic (generated with weekly patterns and noise) because no real donor dataset exists. Replace `history` records with real data when available.
 - Not implemented from the slides: S3 image upload, Redis cache, payment system, message queue.
+- Run the Minikube deployment once on your own laptop before the review so you can say you have tested it.
 - Meals and CO₂e figures use rough conversion factors (2.5 meals/kg, 2.5 kg CO₂e/kg), labelled "est." in the UI.
