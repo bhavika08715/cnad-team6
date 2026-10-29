@@ -123,17 +123,3 @@ Note: the datastore is a single file, so the chart runs 1 replica. Moving to Pos
    (Free tier storage is temporary: demo data is re-created when the service restarts.)
 
 Docker: `docker build -t foodbridge . && docker run -p 3000:3000 foodbridge`
-
-## Useful commands
-
-- `npm test`: automated end-to-end test of the full flow
-- `npm run seed`: reset the database to fresh demo data
-- Change port: `PORT=8080 npm start` (Windows PowerShell: `$env:PORT=8080; npm start`)
-
-## Honest notes for your viva
-
-- The ML model is implemented in pure JavaScript (no external ML library) to keep setup to a single command; the slides mention Java ML, so say "time-series ensemble forecasting" and show the back-test numbers.
-- Historical data is synthetic (generated with weekly patterns and noise) because no real donor dataset exists. Replace `history` records with real data when available.
-- Not implemented from the slides: S3 image upload, Redis cache, payment system, message queue.
-- Run the Minikube deployment once on your own laptop before the review so you can say you have tested it.
-- Meals and CO₂e figures use rough conversion factors (2.5 meals/kg, 2.5 kg CO₂e/kg), labelled "est." in the UI.
