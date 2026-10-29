@@ -21,15 +21,13 @@ CNAD (24CND3101) · Team 6 · Y. Bhavika, N. Keerthi Sri, Y. Adarsh Rishi · Gui
 | Prediction (ML) | Ensemble time-series forecasting (day-of-week mean + moving average) with back-testing |
 | Datastore | Embedded JSON store (swappable for PostgreSQL) |
 | Containerisation | Docker |
-| Orchestration | Kubernetes on Minikube, packaged and deployed with Helm |
 | Cloud hosting (optional) | Render |
 | Testing | Automated end-to-end test (`npm test`), Postman-compatible REST API |
 
-### Cloud-native deployment (Docker + Helm + Minikube)
+### Deployment
 
 - **Docker:** `Dockerfile` packages the app into one image (Node 20 Alpine).
-- **Helm:** `helm/foodbridge` is the chart (Deployment, Service, Secret, PersistentVolumeClaim). Settings such as image, replicas, port, resources and secret live in `values.yaml`.
-- **Minikube:** runs a local Kubernetes cluster. The Deployment has readiness/liveness probes on `/api/health`, resource requests/limits, a Secret for the token key and a persistent volume for data.
+- **Render:** `render.yaml` deploys it to the cloud free tier.
 
 ## Run it (3 steps)
 
@@ -93,27 +91,6 @@ Score (0–100): proximity, capacity fit, pickup-window availability, time slack
 
 ### Security (feedback from Review 1)
 scrypt password hashing, HMAC-signed expiring tokens, role-based access control, input validation, per-IP rate limiting, security headers, HTML-escaped output.
-
-## Deploy on Kubernetes (Docker + Helm + Minikube)
-
-Install once: Docker Desktop, [minikube](https://minikube.sigs.k8s.io/docs/start/), kubectl, [helm](https://helm.sh/docs/intro/install/). Start Docker Desktop, then:
-
-- **Windows:** double-click `k8s\deploy-minikube.bat`
-- **Mac/Linux:** `./k8s/deploy-minikube.sh`
-
-Or step by step from the project folder:
-
-```
-minikube start --driver=docker
-minikube image build -t foodbridge:1.0 .
-helm upgrade --install foodbridge helm/foodbridge
-kubectl get pods
-minikube service foodbridge-foodbridge
-```
-
-The last command opens the app in your browser (keep that terminal open). Useful extras: `kubectl logs deploy/foodbridge-foodbridge`, `helm list`, `helm uninstall foodbridge`, `minikube dashboard`.
-
-Note: the datastore is a single file, so the chart runs 1 replica. Moving to PostgreSQL would allow scaling out (`replicaCount` in `values.yaml`).
 
 ## Deploy to the cloud (Render free tier)
 
